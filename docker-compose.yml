@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: costguard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-costguard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-costguard}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - costguard-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: costguard-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - APP_NAME=LLM Cost Guard
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-costguard}
+      - PRICING_FILE_PATH=/app/config/pricing.yaml
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL:-}
+      - DEFAULT_DAILY_BUDGET=${DEFAULT_DAILY_BUDGET:-10.0}
+      - DEFAULT_WEEKLY_BUDGET=${DEFAULT_WEEKLY_BUDGET:-50.0}
+      - DEFAULT_MONTHLY_BUDGET=${DEFAULT_MONTHLY_BUDGET:-200.0}
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    networks:
+      - costguard-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  costguard-network:
+    driver: bridge

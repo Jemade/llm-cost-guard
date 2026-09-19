@@ -1,0 +1,184 @@
+# LLM Pricing Catalog
+# Cost per 1,000,000 tokens (USD)
+# Prices are verified against official provider documentation.
+# Note: Token pricing changes periodically. Always verify effective_date and last_verified.
+
+version: "1.0.0"
+currency: "USD"
+
+models:
+  # ---------------------------------------------------------------------------
+  # OpenAI Models
+  # Official source: https://openai.com/api/pricing/
+  # Tokenizer: tiktoken (o200k_base for GPT-4o / o-series, cl100k_base for GPT-4 / 3.5)
+  # ---------------------------------------------------------------------------
+  - provider: "openai"
+    model: "gpt-4o"
+    display_name: "OpenAI GPT-4o"
+    tokenizer_type: "tiktoken"
+    encoding_name: "o200k_base"
+    input_cost_per_1m_tokens: 2.50
+    output_cost_per_1m_tokens: 10.00
+    currency: "USD"
+    effective_date: "2024-08-06"
+    last_verified: "2025-01-15"
+    notes: "Flagship multimodal model with 128k context window."
+
+  - provider: "openai"
+    model: "gpt-4o-mini"
+    display_name: "OpenAI GPT-4o Mini"
+    tokenizer_type: "tiktoken"
+    encoding_name: "o200k_base"
+    input_cost_per_1m_tokens: 0.15
+    output_cost_per_1m_tokens: 0.60
+    currency: "USD"
+    effective_date: "2024-07-18"
+    last_verified: "2025-01-15"
+    notes: "High-efficiency, low-cost model replacing GPT-3.5 Turbo."
+
+  - provider: "openai"
+    model: "o1"
+    display_name: "OpenAI o1"
+    tokenizer_type: "tiktoken"
+    encoding_name: "o200k_base"
+    input_cost_per_1m_tokens: 15.00
+    output_cost_per_1m_tokens: 60.00
+    currency: "USD"
+    effective_date: "2024-12-17"
+    last_verified: "2025-01-15"
+    notes: "Reasoning model designed for complex math, science, and coding tasks."
+
+  - provider: "openai"
+    model: "o3-mini"
+    display_name: "OpenAI o3-mini"
+    tokenizer_type: "tiktoken"
+    encoding_name: "o200k_base"
+    input_cost_per_1m_tokens: 1.10
+    output_cost_per_1m_tokens: 4.40
+    currency: "USD"
+    effective_date: "2025-01-31"
+    last_verified: "2025-02-01"
+    notes: "Cost-efficient reasoning model with tier-based reasoning effort."
+
+  - provider: "openai"
+    model: "gpt-4-turbo"
+    display_name: "OpenAI GPT-4 Turbo"
+    tokenizer_type: "tiktoken"
+    encoding_name: "cl100k_base"
+    input_cost_per_1m_tokens: 10.00
+    output_cost_per_1m_tokens: 30.00
+    currency: "USD"
+    effective_date: "2024-04-09"
+    last_verified: "2025-01-15"
+    notes: "Previous-generation flagship model."
+
+  # ---------------------------------------------------------------------------
+  # Anthropic Models
+  # Official source: https://www.anthropic.com/pricing
+  # Tokenizer: Claude BPE (approximation calibrated against cl100k / character heuristic)
+  # ---------------------------------------------------------------------------
+  - provider: "anthropic"
+    model: "claude-3-5-sonnet"
+    display_name: "Anthropic Claude 3.5 Sonnet"
+    tokenizer_type: "approximation"
+    encoding_name: "cl100k_calibrated"
+    input_cost_per_1m_tokens: 3.00
+    output_cost_per_1m_tokens: 15.00
+    currency: "USD"
+    effective_date: "2024-10-22"
+    last_verified: "2025-01-15"
+    notes: "State-of-the-art intelligence for coding, analysis, and reasoning."
+
+  - provider: "anthropic"
+    model: "claude-3-5-haiku"
+    display_name: "Anthropic Claude 3.5 Haiku"
+    tokenizer_type: "approximation"
+    encoding_name: "cl100k_calibrated"
+    input_cost_per_1m_tokens: 0.80
+    output_cost_per_1m_tokens: 4.00
+    currency: "USD"
+    effective_date: "2024-11-04"
+    last_verified: "2025-01-15"
+    notes: "Fast, compact model for high-throughput tasks."
+
+  - provider: "anthropic"
+    model: "claude-3-opus"
+    display_name: "Anthropic Claude 3 Opus"
+    tokenizer_type: "approximation"
+    encoding_name: "cl100k_calibrated"
+    input_cost_per_1m_tokens: 15.00
+    output_cost_per_1m_tokens: 75.00
+    currency: "USD"
+    effective_date: "2024-02-29"
+    last_verified: "2025-01-15"
+    notes: "High-capability model for complex domain reasoning."
+
+  # ---------------------------------------------------------------------------
+  # Google Gemini Models
+  # Official source: https://ai.google.dev/pricing
+  # Tokenizer: SentencePiece (approximation calibrated ~4 chars/token heuristic)
+  # ---------------------------------------------------------------------------
+  - provider: "google"
+    model: "gemini-1.5-pro"
+    display_name: "Google Gemini 1.5 Pro"
+    tokenizer_type: "approximation"
+    encoding_name: "sentencepiece_heuristic"
+    input_cost_per_1m_tokens: 1.25
+    output_cost_per_1m_tokens: 5.00
+    currency: "USD"
+    effective_date: "2024-05-14"
+    last_verified: "2025-01-15"
+    notes: "Prices for prompts <= 128k tokens; 2M context window."
+
+  - provider: "google"
+    model: "gemini-1.5-flash"
+    display_name: "Google Gemini 1.5 Flash"
+    tokenizer_type: "approximation"
+    encoding_name: "sentencepiece_heuristic"
+    input_cost_per_1m_tokens: 0.075
+    output_cost_per_1m_tokens: 0.30
+    currency: "USD"
+    effective_date: "2024-05-14"
+    last_verified: "2025-01-15"
+    notes: "Ultra-fast, lightweight model optimized for frequency and scale."
+
+  - provider: "google"
+    model: "gemini-2.0-flash"
+    display_name: "Google Gemini 2.0 Flash"
+    tokenizer_type: "approximation"
+    encoding_name: "sentencepiece_heuristic"
+    input_cost_per_1m_tokens: 0.10
+    output_cost_per_1m_tokens: 0.40
+    currency: "USD"
+    effective_date: "2024-12-11"
+    last_verified: "2025-01-15"
+    notes: "Next-gen multimodal flash model with real-time capabilities."
+
+  # ---------------------------------------------------------------------------
+  # DeepSeek Models
+  # Official source: https://platform.deepseek.com/api-docs/pricing/
+  # Tokenizer: DeepSeek Byte-level BPE (approximation calibrated with cl100k)
+  # ---------------------------------------------------------------------------
+  - provider: "deepseek"
+    model: "deepseek-chat"
+    display_name: "DeepSeek-V3"
+    tokenizer_type: "approximation"
+    encoding_name: "cl100k_calibrated"
+    input_cost_per_1m_tokens: 0.14
+    output_cost_per_1m_tokens: 0.28
+    currency: "USD"
+    effective_date: "2024-12-26"
+    last_verified: "2025-01-15"
+    notes: "Cache miss rate. Cache hit input rate is $0.014 / 1M."
+
+  - provider: "deepseek"
+    model: "deepseek-reasoner"
+    display_name: "DeepSeek-R1"
+    tokenizer_type: "approximation"
+    encoding_name: "cl100k_calibrated"
+    input_cost_per_1m_tokens: 0.55
+    output_cost_per_1m_tokens: 2.19
+    currency: "USD"
+    effective_date: "2025-01-20"
+    last_verified: "2025-01-25"
+    notes: "Reasoning model with chain-of-thought tokens included in output rate."

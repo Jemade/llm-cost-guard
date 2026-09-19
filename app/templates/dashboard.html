@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_name }} - Dashboard</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <h1 class="brand-title">{{ app_name }}</h1>
+          <p class="brand-tagline">Real-time LLM Token Cost & Concurrency-Safe Budget Control</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <label style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="auto-refresh-toggle" checked> Auto-refresh (30s)
+        </label>
+        <button id="refresh-btn" class="btn">🔄 Refresh</button>
+        <a href="/docs" class="btn btn-primary" target="_blank">API Docs</a>
+        <a href="/metrics" class="btn" target="_blank">Metrics</a>
+      </div>
+    </header>
+
+    <!-- Top Spend & Budget Cards -->
+    <div class="metrics-grid">
+      <!-- Total Spend -->
+      <div class="card">
+        <div class="card-title">Total Spend (All Time)</div>
+        <div class="card-value">${{ "%.4f"|format(summary.total_spend) }}</div>
+        <div class="card-subtitle">
+          <span>Tokens: {{ "{:,}".format(summary.tokens.total) }}</span>
+          <span>Requests: {{ "{:,}".format(summary.requests.total) }}</span>
+        </div>
+      </div>
+
+      <!-- Daily Budget -->
+      <div class="card">
+        <div class="card-title">Daily Budget</div>
+        <div class="card-value">${{ "%.4f"|format(summary.daily_spend) }}</div>
+        {% if summary.daily_budget %}
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill {% if summary.daily_percent_used > 90 %}fill-critical{% elif summary.daily_percent_used > 75 %}fill-warning{% else %}fill-normal{% endif %}"
+               style="width: {{ [summary.daily_percent_used, 100]|min }}%;"></div>
+        </div>
+        <div class="card-subtitle">
+          <span>Limit: ${{ "%.2f"|format(summary.daily_budget) }}</span>
+          <span>Remaining: ${{ "%.4f"|format(summary.daily_remaining) }} ({{ summary.daily_percent_used }}%)</span>
+        </div>
+        {% else %}
+        <div class="card-subtitle">No daily limit set</div>
+        {% endif %}
+      </div>
+
+      <!-- Weekly Budget -->
+      <div class="card">
+        <div class="card-title">Weekly Budget</div>
+        <div class="card-value">${{ "%.4f"|format(summary.weekly_spend) }}</div>
+        {% if summary.weekly_budget %}
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill {% if summary.weekly_percent_used > 90 %}fill-critical{% elif summary.weekly_percent_used > 75 %}fill-warning{% else %}fill-normal{% endif %}"
+               style="width: {{ [summary.weekly_percent_used, 100]|min }}%;"></div>
+        </div>
+        <div class="card-subtitle">
+          <span>Limit: ${{ "%.2f"|format(summary.weekly_budget) }}</span>
+          <span>Remaining: ${{ "%.4f"|format(summary.weekly_remaining) }} ({{ summary.weekly_percent_used }}%)</span>
+        </div>
+        {% else %}
+        <div class="card-subtitle">No weekly limit set</div>
+        {% endif %}
+      </div>
+
+      <!-- Monthly Budget -->
+      <div class="card">
+        <div class="card-title">Monthly Budget</div>
+        <div class="card-value">${{ "%.4f"|format(summary.monthly_spend) }}</div>
+        {% if summary.monthly_budget %}
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill {% if summary.monthly_percent_used > 90 %}fill-critical{% elif summary.monthly_percent_used > 75 %}fill-warning{% else %}fill-normal{% endif %}"
+               style="width: {{ [summary.monthly_percent_used, 100]|min }}%;"></div>
+        </div>
+        <div class="card-subtitle">
+          <span>Limit: ${{ "%.2f"|format(summary.monthly_budget) }}</span>
+          <span>Remaining: ${{ "%.4f"|format(summary.monthly_remaining) }} ({{ summary.monthly_percent_used }}%)</span>
+        </div>
+        {% else %}
+        <div class="card-subtitle">No monthly limit set</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Middle Section: Breakdown by Model & Endpoint -->
+    <div class="dashboard-columns">
+      <!-- Spend by Model -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">Spend by Model</h2>
+          <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ models|length }} active models</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Provider</th>
+                <th>Tokens</th>
+                <th>Requests</th>
+                <th>Spend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in models %}
+              <tr>
+                <td class="mono" style="font-weight: 600;">{{ m.model }}</td>
+                <td style="text-transform: capitalize;">{{ m.provider }}</td>
+                <td>{{ "{:,}".format(m.total_tokens) }}</td>
+                <td>{{ m.requests }}</td>
+                <td style="font-weight: 600;">${{ "%.4f"|format(m.spend) }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  No model usage recorded yet. Run requests or use the seed-data command.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Spend by Endpoint -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">Spend by Endpoint</h2>
+          <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ endpoints|length }} endpoints</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Requests</th>
+                <th>Total Tokens</th>
+                <th>Spend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ep in endpoints %}
+              <tr>
+                <td class="mono">{{ ep.endpoint }}</td>
+                <td>{{ ep.requests }}</td>
+                <td>{{ "{:,}".format(ep.total_tokens) }}</td>
+                <td style="font-weight: 600;">${{ "%.4f"|format(ep.spend) }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  No endpoint usage recorded yet.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Requests Table -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Recent Requests</h2>
+        <span style="font-size: 0.85rem; color: var(--text-secondary);">Showing last {{ recent|length }} calls</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp (UTC)</th>
+              <th>Request ID</th>
+              <th>User</th>
+              <th>Endpoint</th>
+              <th>Model</th>
+              <th>Tokens (In/Out)</th>
+              <th>Est. Cost</th>
+              <th>Actual Cost</th>
+              <th>Latency</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in recent %}
+            <tr>
+              <td style="font-size: 0.8rem; color: var(--text-secondary);">{{ r.timestamp[:19].replace('T', ' ') }}</td>
+              <td class="mono" style="font-size: 0.8rem;">{{ r.request_id[:16] }}...</td>
+              <td class="mono" style="font-size: 0.85rem;">{{ r.user_id }}</td>
+              <td class="mono" style="font-size: 0.85rem;">{{ r.endpoint }}</td>
+              <td class="mono">{{ r.model }}</td>
+              <td>{{ "{:,}".format(r.input_tokens) }} / {{ "{:,}".format(r.output_tokens) }}</td>
+              <td>${{ "%.6f"|format(r.estimated_cost) }}</td>
+              <td>
+                {% if r.actual_cost is not none %}
+                ${{ "%.6f"|format(r.actual_cost) }}
+                {% else %}
+                <span style="color: var(--text-muted);">-</span>
+                {% endif %}
+              </td>
+              <td>{{ "%.1f"|format(r.latency_ms) }} ms</td>
+              <td>
+                {% if r.status == 'SUCCESS' %}
+                <span class="status-badge status-success">SUCCESS</span>
+                {% elif r.status == 'BLOCKED' %}
+                <span class="status-badge status-blocked">BLOCKED</span>
+                {% else %}
+                <span class="status-badge status-failed">{{ r.status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                No usage logs recorded yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
