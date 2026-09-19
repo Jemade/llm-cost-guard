@@ -336,3 +336,4 @@ Run the reproducible demonstration:
 python examples/budget_control_demo.py
 ```
 See [`docs/demo.md`](docs/demo.md) for full scenario walkthrough.
+# llm-cost-guard
