@@ -337,3 +337,12 @@ python examples/budget_control_demo.py
 ```
 See [`docs/demo.md`](docs/demo.md) for full scenario walkthrough.
 # llm-cost-guard
+
+## Budget period boundaries
+
+Daily, weekly, and monthly boundaries are calculated in UTC. Timezone-aware
+reference timestamps are converted to UTC first; naive references are interpreted
+as UTC. Every pending, unexpired reservation counts against the current period,
+including reservations created before midnight or before a week/month rollover.
+This keeps in-flight requests from disappearing from budget checks at a boundary.
+Committed, released, and expired reservations are excluded as before.
