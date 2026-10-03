@@ -27,6 +27,9 @@ class BudgetService:
         Calculates UTC start timestamps for daily, weekly, and monthly periods.
         """
         now = ref_time or datetime.now(timezone.utc)
+        # Naive timestamps are treated as UTC; aware values are converted before
+        # taking calendar boundaries so local dates cannot shift UTC budgets.
+        now = now.replace(tzinfo=timezone.utc) if now.tzinfo is None else now.astimezone(timezone.utc)
         daily_start = datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=timezone.utc)
         weekly_start = daily_start - timedelta(days=daily_start.weekday())
         monthly_start = datetime(now.year, now.month, 1, 0, 0, 0, tzinfo=timezone.utc)
@@ -44,7 +47,7 @@ class BudgetService:
         Optionally applies row-level lock (FOR UPDATE) for transactional concurrency safety.
         """
         stmt = select(BudgetConfig).where(BudgetConfig.scope == scope)
-        if for_update and not db.bind.dialect.name.startswith("sqlite"):
+        if for_update and not db.get_bind().dialect.name.startswith("sqlite"):
             stmt = stmt.with_for_update()
 
         result = await db.execute(stmt)
@@ -106,7 +109,6 @@ class BudgetService:
             BudgetReservation.scope == scope,
             BudgetReservation.status == "PENDING",
             BudgetReservation.expires_at > now,
-            BudgetReservation.created_at >= start_time,
         )
         res_result = await db.execute(res_stmt)
         reservation_spent = float(res_result.scalar_one())

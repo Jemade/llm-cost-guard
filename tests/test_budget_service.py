@@ -108,3 +108,30 @@ async def test_inactive_budget_allows(test_db_session: AsyncSession):
     )
     assert decision == "ALLOW"
     assert reason == "BUDGET_INACTIVE"
+
+
+def test_period_boundaries_convert_to_utc():
+    from datetime import timedelta
+
+    local_time = datetime(2026, 10, 1, 1, tzinfo=timezone(timedelta(hours=2)))
+    periods = budget_service.get_period_starts(local_time)
+    assert periods["daily"] == datetime(2026, 9, 30, tzinfo=timezone.utc)
+    assert periods["monthly"] == datetime(2026, 9, 1, tzinfo=timezone.utc)
+    assert periods["weekly"] == datetime(2026, 9, 28, tzinfo=timezone.utc)
+
+
+@pytest.mark.asyncio
+async def test_pending_reservation_counts_across_period_boundary(test_db_session):
+    from datetime import timedelta
+
+    from app.models.budget import BudgetReservation
+
+    now = datetime.now(timezone.utc)
+    start = budget_service.get_period_starts(now)["daily"]
+    test_db_session.add(BudgetReservation(
+        id=str(uuid.uuid4()), scope="global", request_id="rollover",
+        estimated_cost=Decimal("0.75"), status="PENDING",
+        created_at=start - timedelta(seconds=1), expires_at=now + timedelta(minutes=5),
+    ))
+    await test_db_session.flush()
+    assert await budget_service.calculate_period_spend(test_db_session, "global", start) == 0.75
