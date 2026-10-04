@@ -54,3 +54,9 @@ pytest -q
 ## Current scope
 
 Prices come from the configured pricing file and must be maintained. Token estimates and reserved cost are estimates; recorded usage reconciles them with supplied actual usage. Applications must integrate the budget checks into their request path for enforcement.
+
+## Engineering and contribution guide
+
+Read the [engineering notes](docs/ENGINEERING.md) for implementation boundaries and verification commands, the [review checklist](docs/REVIEW_CHECKLIST.md) for evidence still required, and [CONTRIBUTING.md](CONTRIBUTING.md) to propose changes. Report vulnerabilities through [SECURITY.md](SECURITY.md).
+
+[![Repository hygiene](https://github.com/Jemade/llm-cost-guard/actions/workflows/repository-hygiene.yml/badge.svg)](https://github.com/Jemade/llm-cost-guard/actions/workflows/repository-hygiene.yml)
