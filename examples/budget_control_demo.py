@@ -13,11 +13,11 @@ Can be run directly via:
 """
 
 import asyncio
+import sys
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
-import sys
-import uuid
 
 # Ensure project root is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))

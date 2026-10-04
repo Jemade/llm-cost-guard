@@ -49,3 +49,14 @@ htmlcov/
 .idea/
 *.swp
 *.swo
+
+# Local runtime and private configuration
+node_modules/
+.env.*.local
+.DS_Store
+
+# Never commit private key material
+*.pem
+*.key
+id_rsa
+id_ed25519

@@ -44,7 +44,7 @@ class BudgetService:
         Optionally applies row-level lock (FOR UPDATE) for transactional concurrency safety.
         """
         stmt = select(BudgetConfig).where(BudgetConfig.scope == scope)
-        if for_update and not db.bind.dialect.name.startswith("sqlite"):
+        if for_update and not db.get_bind().dialect.name.startswith("sqlite"):
             stmt = stmt.with_for_update()
 
         result = await db.execute(stmt)

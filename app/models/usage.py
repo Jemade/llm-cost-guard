@@ -1,14 +1,14 @@
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, Optional
-import uuid
 
 from sqlalchemy import (
+    JSON,
     DateTime,
     Float,
     Index,
     Integer,
-    JSON,
     Numeric,
     String,
 )
